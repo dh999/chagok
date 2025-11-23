@@ -1,20 +1,53 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_colors.dart';
 import '../../../core/constants/app_strings.dart';
+import '../../../core/router/app_router.dart';
 import '../../providers/view_mode_provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/user_provider.dart';
 import '../../widgets/animations/zoom_transition.dart';
+import '../../widgets/dialogs/level_up_dialog.dart';
 import 'microscope_view.dart';
 import 'telescope_view.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // 초기 레벨 설정
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final level = ref.read(rabbitLevelProvider);
+      ref.read(levelChangeNotifierProvider.notifier).checkLevelChange(level);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final viewMode = ref.watch(viewModeProvider);
     final currentUser = ref.watch(currentUserProvider);
+    final currentLevel = ref.watch(rabbitLevelProvider);
+
+    // 레벨 변경 감지
+    ref.listen<int>(rabbitLevelProvider, (previous, next) {
+      ref.read(levelChangeNotifierProvider.notifier).checkLevelChange(next);
+    });
+
+    // 레벨업 알림 표시
+    ref.listen<int?>(levelChangeNotifierProvider, (previous, next) {
+      if (next != null) {
+        LevelUpDialog.show(context, next);
+        ref.read(levelChangeNotifierProvider.notifier).clearNotification();
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -32,11 +65,15 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
         actions: [
+          // 토끼 상담 버튼
+          IconButton(
+            onPressed: () => context.push(AppRoutes.onboarding),
+            tooltip: '토끼와 상담하기',
+            icon: const Text('🐰', style: TextStyle(fontSize: 24)),
+          ),
           // 프로필 버튼
           IconButton(
-            onPressed: () {
-              // TODO: 프로필 화면으로 이동
-            },
+            onPressed: () => context.push(AppRoutes.profile),
             icon: CircleAvatar(
               radius: 16,
               backgroundColor: AppColors.surfaceVariant,

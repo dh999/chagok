@@ -50,16 +50,25 @@ class ChatRepository {
   /// 진행 중인 온보딩 세션 조회
   Future<ChatSessionModel?> getActiveOnboardingSession(String uid) async {
     try {
+      // closed_at이 null인 세션을 찾기 위해 먼저 세션 타입으로 필터링
       final snapshot = await _collection
           .where('uid', isEqualTo: uid)
           .where('session_type', isEqualTo: SessionType.onboarding.value)
-          .where('closed_at', isNull: true)
           .orderBy('created_at', descending: true)
-          .limit(1)
+          .limit(5)
           .get();
 
       if (snapshot.docs.isEmpty) return null;
-      return ChatSessionModel.fromFirestore(snapshot.docs.first);
+
+      // 클라이언트 측에서 closed_at이 null인 세션 필터링
+      for (final doc in snapshot.docs) {
+        final data = doc.data();
+        if (data['closed_at'] == null) {
+          return ChatSessionModel.fromFirestore(doc);
+        }
+      }
+
+      return null;
     } catch (e) {
       throw FirestoreException(
         message: '채팅 세션을 불러오는데 실패했습니다.',

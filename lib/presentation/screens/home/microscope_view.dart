@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_colors.dart';
@@ -300,36 +301,16 @@ class _ParticlePainter extends CustomPainter {
       ][i % 3].withOpacity(opacity);
 
       final offset = Offset(
-        center.dx + distance * cos(angle),
-        center.dy + distance * sin(angle) - progress * 50,
+        center.dx + distance * math.cos(angle),
+        center.dy + distance * math.sin(angle) - progress * 50,
       );
 
       canvas.drawCircle(offset, 6 * (1 - progress * 0.5), paint);
     }
   }
 
-  double cos(double x) => x.cos();
-  double sin(double x) => x.sin();
-
   @override
   bool shouldRepaint(covariant _ParticlePainter oldDelegate) {
     return oldDelegate.progress != progress;
   }
-}
-
-extension on double {
-  double cos() => _cos(this);
-  double sin() => _sin(this);
-}
-
-double _cos(double x) {
-  return (x >= 0 ? 1 : -1) *
-      (1 -
-          x * x / 2 +
-          x * x * x * x / 24 -
-          x * x * x * x * x * x / 720);
-}
-
-double _sin(double x) {
-  return x - x * x * x / 6 + x * x * x * x * x / 120;
 }

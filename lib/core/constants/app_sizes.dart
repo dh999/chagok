@@ -41,4 +41,28 @@ class AppSizes {
 
   // Character Sizes
   static const double rabbitSize = 80.0;
+
+  // Animation Durations (milliseconds)
+  static const int animFast = 150;
+  static const int animNormal = 300;
+  static const int animSlow = 500;
+  static const int animVerySlow = 800;
+
+  // Game Constants
+  static const int maxMissionsPerDay = 5;
+  static const int baseExpPerMission = 10;
+  static const int allClearBonusExp = 30;
+  static const int allClearBonusBlocks = 1;
+  static const int maxLevel = 10;
+
+  // Level Thresholds (EXP required for each level)
+  static const List<int> levelThresholds = [0, 100, 300, 600, 1000, 1500, 2100, 2800, 3600, 4500];
+
+  // Streak Thresholds for rewards
+  static const List<int> streakMilestones = [7, 14, 30, 60, 100];
+
+  // Input constraints
+  static const int maxNicknameLength = 20;
+  static const int maxGoalLength = 100;
+  static const int maxMessageLength = 500;
 }

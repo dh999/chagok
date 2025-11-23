@@ -176,13 +176,18 @@ class ChatNotifier extends StateNotifier<ChatState> {
         category = GoalCategory.career;
       }
 
+      // 사용자 목표 텍스트 추출
+      final userMessages = state.messages
+          .where((m) => m.isUser)
+          .map((m) => m.content)
+          .join(' ');
+      final goalText = userMessages.length > 100
+          ? userMessages.substring(0, 100)
+          : userMessages;
+
       // 사용자 정보 업데이트
       await _ref.read(userNotifierProvider.notifier).completeOnboarding(
-            finalGoal: state.messages
-                .where((m) => m.isUser)
-                .map((m) => m.content)
-                .join(' ')
-                .substring(0, 100),
+            finalGoal: goalText,
             goalCategory: category,
             targetDate: DateTime.now().add(Duration(days: totalDays)),
             totalBlocksNeeded: totalDays * 2,

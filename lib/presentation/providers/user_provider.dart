@@ -127,3 +127,35 @@ final houseLevelProvider = Provider<int>((ref) {
   final currentUser = ref.watch(currentUserProvider);
   return currentUser.valueOrNull?.houseLevel ?? 1;
 });
+
+/// Rabbit Level Provider
+final rabbitLevelProvider = Provider<int>((ref) {
+  final currentUser = ref.watch(currentUserProvider);
+  return currentUser.valueOrNull?.rabbitLevel ?? 1;
+});
+
+/// Level Change Notifier - 레벨업 감지용
+class LevelChangeNotifier extends StateNotifier<int?> {
+  int _lastKnownLevel = 0;
+
+  LevelChangeNotifier() : super(null);
+
+  /// 레벨 변경 체크 및 알림
+  void checkLevelChange(int currentLevel) {
+    if (_lastKnownLevel > 0 && currentLevel > _lastKnownLevel) {
+      // 레벨업 발생!
+      state = currentLevel;
+    }
+    _lastKnownLevel = currentLevel;
+  }
+
+  /// 알림 확인 후 리셋
+  void clearNotification() {
+    state = null;
+  }
+}
+
+final levelChangeNotifierProvider =
+    StateNotifierProvider<LevelChangeNotifier, int?>((ref) {
+  return LevelChangeNotifier();
+});
