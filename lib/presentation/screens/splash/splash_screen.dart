@@ -19,6 +19,8 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   late AnimationController _controller;
   late Animation<double> _fadeAnimation;
   late Animation<double> _scaleAnimation;
+  int _retryCount = 0;
+  static const int _maxRetries = 5;
 
   @override
   void initState() {
@@ -62,8 +64,14 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
         }
       },
       loading: () {
-        // 로딩 중이면 대기
-        Future.delayed(const Duration(seconds: 1), _checkAuthAndNavigate);
+        // 로딩 중이면 제한된 횟수만큼 재시도
+        if (_retryCount < _maxRetries) {
+          _retryCount++;
+          Future.delayed(const Duration(seconds: 1), _checkAuthAndNavigate);
+        } else {
+          // 최대 재시도 횟수 초과 시 로그인 화면으로
+          if (mounted) context.go(AppRoutes.login);
+        }
       },
       error: (_, __) {
         context.go(AppRoutes.login);

@@ -20,8 +20,22 @@ class ChatInput extends StatefulWidget {
 class _ChatInputState extends State<ChatInput> {
   final TextEditingController _controller = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  final ValueNotifier<bool> _hasText = ValueNotifier(false);
 
-  bool get _canSend => _controller.text.trim().isNotEmpty && widget.enabled;
+  bool get _canSend => _hasText.value && widget.enabled;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addListener(_onTextChanged);
+  }
+
+  void _onTextChanged() {
+    final hasText = _controller.text.trim().isNotEmpty;
+    if (_hasText.value != hasText) {
+      _hasText.value = hasText;
+    }
+  }
 
   void _handleSend() {
     if (!_canSend) return;
@@ -33,8 +47,10 @@ class _ChatInputState extends State<ChatInput> {
 
   @override
   void dispose() {
+    _controller.removeListener(_onTextChanged);
     _controller.dispose();
     _focusNode.dispose();
+    _hasText.dispose();
     super.dispose();
   }
 
@@ -74,7 +90,6 @@ class _ChatInputState extends State<ChatInput> {
                 minLines: 1,
                 textInputAction: TextInputAction.send,
                 onSubmitted: (_) => _handleSend(),
-                onChanged: (_) => setState(() {}),
                 decoration: InputDecoration(
                   hintText: AppStrings.messagePlaceholder,
                   hintStyle: TextStyle(color: AppColors.textHint),
@@ -94,20 +109,27 @@ class _ChatInputState extends State<ChatInput> {
 
           const SizedBox(width: AppSizes.sm),
 
-          // 전송 버튼
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            child: IconButton(
-              onPressed: _canSend ? _handleSend : null,
-              icon: Icon(
-                Icons.send_rounded,
-                color: _canSend ? AppColors.primary : AppColors.textHint,
-              ),
-              style: IconButton.styleFrom(
-                backgroundColor:
-                    _canSend ? AppColors.primary.withOpacity(0.1) : null,
-              ),
-            ),
+          // 전송 버튼 (ValueListenableBuilder로 최적화)
+          ValueListenableBuilder<bool>(
+            valueListenable: _hasText,
+            builder: (context, hasText, _) {
+              final canSend = hasText && widget.enabled;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                child: IconButton(
+                  onPressed: canSend ? _handleSend : null,
+                  tooltip: '전송',
+                  icon: Icon(
+                    Icons.send_rounded,
+                    color: canSend ? AppColors.primary : AppColors.textHint,
+                  ),
+                  style: IconButton.styleFrom(
+                    backgroundColor:
+                        canSend ? AppColors.primary.withOpacity(0.1) : null,
+                  ),
+                ),
+              );
+            },
           ),
         ],
       ),

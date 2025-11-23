@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../../core/constants/firestore_collections.dart';
 
 class FirebaseService {
   static final FirebaseService _instance = FirebaseService._internal();
@@ -14,16 +15,16 @@ class FirebaseService {
 
   // Collections
   CollectionReference<Map<String, dynamic>> get usersCollection =>
-      _firestore.collection('users');
+      _firestore.collection(FirestoreCollections.users);
 
   CollectionReference<Map<String, dynamic>> get missionsCollection =>
-      _firestore.collection('missions');
+      _firestore.collection(FirestoreCollections.missions);
 
   CollectionReference<Map<String, dynamic>> get chatSessionsCollection =>
-      _firestore.collection('chat_sessions');
+      _firestore.collection(FirestoreCollections.chatSessions);
 
   CollectionReference<Map<String, dynamic>> get rewardsCollection =>
-      _firestore.collection('rewards');
+      _firestore.collection(FirestoreCollections.rewards);
 
   // Current user
   User? get currentUser => _auth.currentUser;

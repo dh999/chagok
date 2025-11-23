@@ -160,19 +160,19 @@ class ChatNotifier extends StateNotifier<ChatState> {
 
       // 목표 카테고리 추론
       GoalCategory category = GoalCategory.study;
-      final goalText = dailyMissions.join(' ').toLowerCase();
-      if (goalText.contains('돈') ||
-          goalText.contains('저축') ||
-          goalText.contains('투자') ||
-          goalText.contains('부동산')) {
+      final missionText = dailyMissions.join(' ').toLowerCase();
+      if (missionText.contains('돈') ||
+          missionText.contains('저축') ||
+          missionText.contains('투자') ||
+          missionText.contains('부동산')) {
         category = GoalCategory.finance;
-      } else if (goalText.contains('운동') ||
-          goalText.contains('건강') ||
-          goalText.contains('다이어트')) {
+      } else if (missionText.contains('운동') ||
+          missionText.contains('건강') ||
+          missionText.contains('다이어트')) {
         category = GoalCategory.health;
-      } else if (goalText.contains('취업') ||
-          goalText.contains('이직') ||
-          goalText.contains('커리어')) {
+      } else if (missionText.contains('취업') ||
+          missionText.contains('이직') ||
+          missionText.contains('커리어')) {
         category = GoalCategory.career;
       }
 
@@ -181,13 +181,13 @@ class ChatNotifier extends StateNotifier<ChatState> {
           .where((m) => m.isUser)
           .map((m) => m.content)
           .join(' ');
-      final goalText = userMessages.length > 100
+      final userGoalText = userMessages.length > 100
           ? userMessages.substring(0, 100)
           : userMessages;
 
       // 사용자 정보 업데이트
       await _ref.read(userNotifierProvider.notifier).completeOnboarding(
-            finalGoal: goalText,
+            finalGoal: userGoalText,
             goalCategory: category,
             targetDate: DateTime.now().add(Duration(days: totalDays)),
             totalBlocksNeeded: totalDays * 2,

@@ -56,6 +56,23 @@ class ProfileScreen extends ConsumerWidget {
                                     fit: BoxFit.cover,
                                     width: 100,
                                     height: 100,
+                                    semanticLabel: '프로필 이미지',
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return const SizedBox(
+                                        width: 100,
+                                        height: 100,
+                                        child: Center(
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    },
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return const Text(
+                                        '🐰',
+                                        style: TextStyle(fontSize: 40),
+                                      );
+                                    },
                                   ),
                                 )
                               : const Text(

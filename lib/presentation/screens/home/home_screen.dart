@@ -20,15 +20,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
-  @override
-  void initState() {
-    super.initState();
-    // 초기 레벨 설정
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final level = ref.read(rabbitLevelProvider);
-      ref.read(levelChangeNotifierProvider.notifier).checkLevelChange(level);
-    });
-  }
+  bool _initialLevelSet = false;
 
   @override
   Widget build(BuildContext context) {
@@ -36,16 +28,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final currentUser = ref.watch(currentUserProvider);
     final currentLevel = ref.watch(rabbitLevelProvider);
 
-    // 레벨 변경 감지
-    ref.listen<int>(rabbitLevelProvider, (previous, next) {
-      ref.read(levelChangeNotifierProvider.notifier).checkLevelChange(next);
-    });
+    // 초기 레벨 설정 (한 번만 실행)
+    if (!_initialLevelSet) {
+      _initialLevelSet = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(levelChangeNotifierProvider.notifier).checkLevelChange(currentLevel);
+      });
+    }
 
-    // 레벨업 알림 표시
-    ref.listen<int?>(levelChangeNotifierProvider, (previous, next) {
-      if (next != null) {
+    // 레벨 변경 감지 및 알림 표시
+    ref.listen<int>(rabbitLevelProvider, (previous, next) {
+      if (previous != null && next > previous) {
         LevelUpDialog.show(context, next);
-        ref.read(levelChangeNotifierProvider.notifier).clearNotification();
       }
     });
 
@@ -74,6 +68,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // 프로필 버튼
           IconButton(
             onPressed: () => context.push(AppRoutes.profile),
+            tooltip: '프로필',
             icon: CircleAvatar(
               radius: 16,
               backgroundColor: AppColors.surfaceVariant,
@@ -82,6 +77,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: Image.network(
                         currentUser.valueOrNull!.profileImageUrl!,
                         fit: BoxFit.cover,
+                        width: 32,
+                        height: 32,
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) return child;
+                          return const SizedBox(
+                            width: 32,
+                            height: 32,
+                            child: Center(
+                              child: SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                            ),
+                          );
+                        },
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Text('👤', style: TextStyle(fontSize: 16));
+                        },
                       ),
                     )
                   : const Text('👤', style: TextStyle(fontSize: 16)),

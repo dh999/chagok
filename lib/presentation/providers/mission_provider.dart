@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../data/models/mission_model.dart';
 import '../../data/repositories/mission_repository.dart';
@@ -25,7 +26,13 @@ final todayMissionsProvider = StreamProvider<List<MissionModel>>((ref) {
   if (uid == null) return Stream.value([]);
 
   final missionRepository = ref.watch(missionRepositoryProvider);
-  return missionRepository.watchTodayMissions(uid);
+  return missionRepository.watchTodayMissions(uid).handleError(
+    (error, stackTrace) {
+      debugPrint('미션 로드 에러: $error');
+      // 에러 발생 시 빈 리스트 반환
+      return <MissionModel>[];
+    },
+  );
 });
 
 /// Pending Missions Provider (미완료 미션만)
